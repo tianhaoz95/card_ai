@@ -19,6 +19,7 @@ class SpendScreen extends StatefulWidget {
 class _SpendScreenState extends State<SpendScreen> {
   final TextEditingController _purchaseInfoController = TextEditingController();
   String _bestCardMatch = '';
+  bool _isLoading = false; // Added loading state
 
   @override
   Widget build(BuildContext context) {
@@ -68,22 +69,39 @@ class _SpendScreenState extends State<SpendScreen> {
                   decoration: InputDecoration(labelText: localizations.purchaseInfoHint),
                 ),
                 const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () async {
-                    final purchaseInfo = _purchaseInfoController.text;
-                    if (purchaseInfo.isNotEmpty) {
-                      final List<CreditCard> userCards = await cardService.getCardsForUser().first;
-                      final List<Map<String, String>> cardInfo = userCards
-                          .map((card) => {'name': card.name, 'url': card.url})
-                          .toList();
-                      final result = await llmService.getBestCardMatch(cardInfo, purchaseInfo);
-                      setState(() {
-                        _bestCardMatch = result;
-                      });
-                    }
-                  },
-                  child: Text(localizations.getMatchButton),
-                ),
+                _isLoading
+                    ? const CircularProgressIndicator() // Show progress indicator when loading
+                    : ElevatedButton(
+                        onPressed: () async {
+                          final purchaseInfo = _purchaseInfoController.text;
+                          if (purchaseInfo.isNotEmpty) {
+                            setState(() {
+                              _isLoading = true; // Set loading to true
+                              _bestCardMatch = ''; // Clear previous match
+                            });
+                            try {
+                              final List<CreditCard> userCards = await cardService.getCardsForUser().first;
+                              final List<Map<String, String>> cardInfo = userCards
+                                  .map((card) => {'name': card.name, 'url': card.url})
+                                  .toList();
+                              final result = await llmService.getBestCardMatch(cardInfo, purchaseInfo);
+                              setState(() {
+                                _bestCardMatch = result;
+                              });
+                            } catch (e) {
+                              // Handle error, e.g., show a SnackBar
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Error getting card match: $e')),
+                              );
+                            } finally {
+                              setState(() {
+                                _isLoading = false; // Set loading to false
+                              });
+                            }
+                          }
+                        },
+                        child: Text(localizations.getMatchButton),
+                      ),
                 const SizedBox(height: 20),
                 if (_bestCardMatch.isNotEmpty)
                   Text(
