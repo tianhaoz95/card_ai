@@ -20,3 +20,5 @@ dependencies:
 the logic for finding matching card is to supply the card information and the purchase information user provide as context and prompt the large language model to output a credit card match.
 firebase service has already been initialized manually, no need to redo setup.
 during development, use `flutter build apk` to check for build errors to ensure the correctness of implementation.
+
+your task is to add a progress indicator when the user taps "get best card match" button to indicate that the model is still working on getting the result.
