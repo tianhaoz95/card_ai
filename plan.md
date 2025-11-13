@@ -17,5 +17,6 @@ dependencies:
       url: https://github.com/cactus-compute/cactus-flutter.git
       ref: main
 ```
+the logic for finding matching card is to supply the card information and the purchase information user provide as context and prompt the large language model to output a credit card match.
 firebase service has already been initialized manually, so do not redo it.
 during development, use `flutter build apk` to check for build errors to ensure the correctness of implementation.
