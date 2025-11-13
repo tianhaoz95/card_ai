@@ -8,5 +8,13 @@ the app should have the following screens:
 the app should support internationalization for english and chinese. when the user switch between the languages in settings screen, all content in the app should switch language.
 the app should use llm to get the best credit card match for the user base on the purchase information user provide. for the app to switch between llm service providers, a intereface for converting user purchase information to card match should be created to avoid complication when switching between llm service providers.
 the app should use local llm. the app should use cactus as the llm provider. refer to https://www.cactuscompute.com/docs/flutter for how to integrate cactus with flutter. the llm provider can change in the future, so encapsulate the usage of cactus.
+use the git version of cactus instead of version like this:
+```
+dependencies:
+  cactus:
+    git:
+      url: https://github.com/cactus-compute/cactus-flutter.git
+      ref: main
+```
 firebase service has already been initialized manually, so do not redo it.
 during development, use `flutter build apk` to check for build errors to ensure the correctness of implementation.
