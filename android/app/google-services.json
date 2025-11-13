@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "639130500903",
+    "project_id": "card-ai-app",
+    "storage_bucket": "card-ai-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:639130500903:android:ac2235a3249af5658e3302",
+        "android_client_info": {
+          "package_name": "com.example.card_ai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAl962wH4xc1RyJWz5Vnu4Qb_6aY4U-Vks"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
