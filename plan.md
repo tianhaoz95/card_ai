@@ -1,0 +1,3 @@
+- [ ] when the model was already downloaded last time, do not prompt user to go to settings screen to download model. this means that the app needs to check if the model was downloaded upon launch into spend screen.
+- [ ] make the text field to enter purchase details and the button to get best card match on the same row with the text field on the left and button on the right.
+- [ ] all content in the settings screen should be centered to the screen instead of align to the left.
