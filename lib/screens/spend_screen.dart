@@ -29,10 +29,12 @@ class _SpendScreenState extends State<SpendScreen> {
     return match?.group(1)?.trim() ?? '';
   }
 
-  // Helper to remove <think> tags and their content
+  // Helper to remove <think> tags and their content, and also "<|im_end|>"
   String _removeThinkContent(String text) {
-    final RegExp regExp = RegExp(r'<think>.*?</think>', dotAll: true);
-    return text.replaceAll(regExp, '').trim();
+    final RegExp thinkRegExp = RegExp(r'<think>.*?</think>', dotAll: true);
+    String cleanedText = text.replaceAll(thinkRegExp, '').trim();
+    cleanedText = cleanedText.replaceAll('<|im_end|>', '').trim();
+    return cleanedText;
   }
 
   @override
@@ -124,9 +126,11 @@ class _SpendScreenState extends State<SpendScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        'Best Card: $_bestCardMatch',
-                        style: Theme.of(context).textTheme.headlineSmall,
+                      Expanded(
+                        child: Text(
+                          'Best Card: $_bestCardMatch',
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
                       ),
                       if (_thinkContent.isNotEmpty)
                         IconButton(
