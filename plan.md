@@ -1,4 +1,4 @@
-your task is to build on top the bare minimal flutter app to build a credit card selector app. the app aims to help user always find the credit card with best reward when spending at the store.
+your task is to build on top the bare minimal flutter app to create a LLM assisted credit card selector app. the app aims to help user always find the credit card with best reward when spending at the store.
 the app uses flutter as the client framework. the app uses firebase as the backend. the app should only use firebase authentication and firestore and should not use any other firebase services.
 the app should have the following screens:
 - login screen: login with email and password is supported.
