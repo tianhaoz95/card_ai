@@ -45,6 +45,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   _emailController.text,
                   _passwordController.text,
                 );
+                if (!mounted) return;
                 Navigator.of(context).pop(); // Go back to login screen
               },
               child: Text(localizations.signupButton),

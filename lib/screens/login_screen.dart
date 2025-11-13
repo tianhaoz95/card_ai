@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:card_ai/l10n/app_localizations.dart';
 
 import '../services/auth_service.dart';
-import '../providers/app_state.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {

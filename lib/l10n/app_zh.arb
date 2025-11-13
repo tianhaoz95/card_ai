@@ -23,5 +23,7 @@
     "modelNotDownloaded": "LLM模型未下载。请前往设置下载。",
     "goToSettingsButton": "前往设置",
     "cancelButton": "取消",
-    "noCardsMessage": "尚未添加卡片。添加您的第一张卡片！"
+    "noCardsMessage": "尚未添加卡片。添加您的第一张卡片！",
+    "thinkingProcessTitle": "思考过程",
+    "okButton": "确定"
 }

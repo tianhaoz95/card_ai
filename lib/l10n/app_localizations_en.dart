@@ -81,4 +81,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noCardsMessage => 'No cards added yet. Add your first card!';
+
+  @override
+  String get thinkingProcessTitle => 'Thinking Process';
+
+  @override
+  String get okButton => 'OK';
 }

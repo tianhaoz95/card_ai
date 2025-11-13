@@ -19,7 +19,21 @@ class SpendScreen extends StatefulWidget {
 class _SpendScreenState extends State<SpendScreen> {
   final TextEditingController _purchaseInfoController = TextEditingController();
   String _bestCardMatch = '';
+  String _thinkContent = ''; // New state variable for think content
   bool _isLoading = false; // Added loading state
+
+  // Helper to extract content between <think> tags
+  String _extractThinkContent(String text) {
+    final RegExp regExp = RegExp(r'<think>(.*?)</think>', dotAll: true);
+    final Match? match = regExp.firstMatch(text);
+    return match?.group(1)?.trim() ?? '';
+  }
+
+  // Helper to remove <think> tags and their content
+  String _removeThinkContent(String text) {
+    final RegExp regExp = RegExp(r'<think>.*?</think>', dotAll: true);
+    return text.replaceAll(regExp, '').trim();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,18 +92,21 @@ class _SpendScreenState extends State<SpendScreen> {
                             setState(() {
                               _isLoading = true; // Set loading to true
                               _bestCardMatch = ''; // Clear previous match
+                              _thinkContent = ''; // Clear previous think content
                             });
                             try {
                               final List<CreditCard> userCards = await cardService.getCardsForUser().first;
                               final List<Map<String, String>> cardInfo = userCards
                                   .map((card) => {'name': card.name, 'url': card.url})
                                   .toList();
-                              final result = await llmService.getBestCardMatch(cardInfo, purchaseInfo);
+                              final rawResult = await llmService.getBestCardMatch(cardInfo, purchaseInfo);
                               setState(() {
-                                _bestCardMatch = result;
+                                _thinkContent = _extractThinkContent(rawResult);
+                                _bestCardMatch = _removeThinkContent(rawResult);
                               });
                             } catch (e) {
                               // Handle error, e.g., show a SnackBar
+                              if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(content: Text('Error getting card match: $e')),
                               );
@@ -104,15 +121,45 @@ class _SpendScreenState extends State<SpendScreen> {
                       ),
                 const SizedBox(height: 20),
                 if (_bestCardMatch.isNotEmpty)
-                  Text(
-                    'Best Card: $_bestCardMatch',
-                    style: Theme.of(context).textTheme.headlineSmall,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Best Card: $_bestCardMatch',
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      if (_thinkContent.isNotEmpty)
+                        IconButton(
+                          icon: const Icon(Icons.help_outline),
+                          onPressed: () => _showThinkContentDialog(context, localizations, _thinkContent),
+                        ),
+                    ],
                   ),
               ],
             ],
           ),
         ),
       ),
+    );
+  }
+
+  void _showThinkContentDialog(BuildContext context, AppLocalizations localizations, String content) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(localizations.thinkingProcessTitle), // Assuming a localization key for "Thinking Process"
+          content: SingleChildScrollView(
+            child: Text(content),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(localizations.okButton), // Assuming a localization key for "OK"
+            ),
+          ],
+        );
+      },
     );
   }
 }

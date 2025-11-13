@@ -241,6 +241,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No cards added yet. Add your first card!'**
   String get noCardsMessage;
+
+  /// No description provided for @thinkingProcessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking Process'**
+  String get thinkingProcessTitle;
+
+  /// No description provided for @okButton.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get okButton;
 }
 
 class _AppLocalizationsDelegate

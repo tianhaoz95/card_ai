@@ -11,7 +11,6 @@ import 'services/llm_service.dart';
 import 'services/cactus_llm_service.dart';
 import 'providers/app_state.dart';
 import 'screens/login_screen.dart';
-import 'screens/card_screen.dart';
 import 'screens/spend_screen.dart'; // Import SpendScreen
 
 void main() async {

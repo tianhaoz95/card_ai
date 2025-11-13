@@ -14,13 +14,6 @@ class CactusLlmService implements LlmService {
     _downloadProgress.add(0.0);
   }
 
-  Future<void> _initCactus() async {
-    // The CactusLM class does not seem to have an isModelDownloaded method directly.
-    // We will rely on the downloadModel method to manage the state.
-    // For now, we assume the model is not downloaded until downloadModel is explicitly called.
-    // If CactusLM provides a way to check downloaded models, it should be integrated here.
-  }
-
   @override
   Stream<double> get downloadProgress => _downloadProgress.stream;
 

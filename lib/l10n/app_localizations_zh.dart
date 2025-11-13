@@ -79,4 +79,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get noCardsMessage => '尚未添加卡片。添加您的第一张卡片！';
+
+  @override
+  String get thinkingProcessTitle => '思考过程';
+
+  @override
+  String get okButton => '确定';
 }

@@ -1,2 +1,2 @@
-- [ ] the output from the model after tapping on "get best card match" between "<think>" and "</think>" should not be presented to the user. add a button with question mark icon next to the result. when the user taps on the question mark icon button, a pop up window should show up to present the content between "<think>" and "</think>".
-- [ ] remove the shopping icon button in card screen, going from card screen to spend screen should be through back button which is already there.
+- [x] the output from the model after tapping on "get best card match" between "<think>" and "</think>" should not be presented to the user. add a button with question mark icon next to the result. when the user taps on the question mark icon button, a pop up window should show up to present the content between "<think>" and "</think>".
+- [x] remove the shopping icon button in card screen, going from card screen to spend screen should be through back button which is already there.

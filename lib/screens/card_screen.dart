@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:card_ai/l10n/app_localizations.dart';
 
-import '../providers/app_state.dart';
 import '../services/card_service.dart';
 import '../models/credit_card.dart';
 import 'settings_screen.dart';
-import 'spend_screen.dart';
 
 class CardScreen extends StatelessWidget {
   const CardScreen({super.key});
@@ -45,6 +43,7 @@ class CardScreen extends StatelessWidget {
                 } else {
                   await cardService.updateCard(card.id, nameController.text, urlController.text);
                 }
+                if (!context.mounted) return;
                 Navigator.of(context).pop();
               },
               child: Text(localizations.saveButton),
@@ -57,7 +56,6 @@ class CardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appState = Provider.of<AppState>(context);
     final cardService = Provider.of<CardService>(context);
     final localizations = AppLocalizations.of(context)!;
 
@@ -69,12 +67,6 @@ class CardScreen extends StatelessWidget {
             icon: const Icon(Icons.settings),
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SettingsScreen()));
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.shopping_cart),
-            onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SpendScreen()));
             },
           ),
         ],

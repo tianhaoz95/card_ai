@@ -20,7 +20,7 @@ class AuthService {
       User? user = result.user;
       return user != null ? AppUser.fromFirebaseUser(user) : null;
     } catch (e) {
-      print(e.toString());
+      // print(e.toString()); // Removed print statement
       return null;
     }
   }
@@ -31,7 +31,7 @@ class AuthService {
       User? user = result.user;
       return user != null ? AppUser.fromFirebaseUser(user) : null;
     } catch (e) {
-      print(e.toString());
+      // print(e.toString()); // Removed print statement
       return null;
     }
   }
@@ -40,8 +40,8 @@ class AuthService {
     try {
       return await _firebaseAuth.signOut();
     } catch (e) {
-      print(e.toString());
-      return null;
+      // print(e.toString()); // Removed print statement
+      // return null; // Removed return null
     }
   }
 
@@ -49,9 +49,9 @@ class AuthService {
     try {
       await _firebaseAuth.currentUser?.delete();
     } catch (e) {
-      print(e.toString());
+      // print(e.toString()); // Removed print statement
       // Handle re-authentication if needed
-      return null;
+      // return null; // Removed return null
     }
   }
 }

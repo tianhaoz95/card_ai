@@ -23,5 +23,7 @@
     "modelNotDownloaded": "LLM Model not downloaded. Please go to Settings to download.",
     "goToSettingsButton": "Go to Settings",
     "cancelButton": "Cancel",
-    "noCardsMessage": "No cards added yet. Add your first card!"
+    "noCardsMessage": "No cards added yet. Add your first card!",
+    "thinkingProcessTitle": "Thinking Process",
+    "okButton": "OK"
 }
