@@ -1,6 +1,7 @@
 import 'package:cactus/cactus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Import shared_preferences
 
 import 'llm_service.dart';
 
@@ -12,11 +13,20 @@ class CactusLlmService implements LlmService {
 
   bool _isModelDownloaded = false;
 
-  CactusLlmService() {
-    _isModelDownloaded =
-        false; // Initialize to false, will be set to true after successful download
+  static const String _isModelDownloadedKey = 'isModelDownloaded'; // Key for shared_preferences
 
-    _downloadProgress.add(0.0);
+  CactusLlmService() {
+    _initModelStatus(); // Initialize model status asynchronously
+  }
+
+  Future<void> _initModelStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    _isModelDownloaded = prefs.getBool(_isModelDownloadedKey) ?? false;
+    if (_isModelDownloaded) {
+      _downloadProgress.add(1.0); // If already downloaded, set progress to 1.0
+    } else {
+      _downloadProgress.add(0.0); // If not downloaded, set progress to 0.0
+    }
   }
 
   @override
@@ -29,7 +39,6 @@ class CactusLlmService implements LlmService {
   Future<void> downloadModel() async {
     if (_isModelDownloaded) {
       _downloadProgress.add(1.0);
-
       return;
     }
 
@@ -66,6 +75,8 @@ class CactusLlmService implements LlmService {
           .initializeModel(); // Assuming initializeModel is needed after download
 
       _isModelDownloaded = true;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_isModelDownloadedKey, true); // Save status
 
       _downloadProgress.add(1.0);
     } catch (e) {
