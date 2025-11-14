@@ -93,6 +93,7 @@ class CactusLlmService implements LlmService {
   Future<String> getBestCardMatch(
     List<Map<String, String>> cardInfo,
     String purchaseInfo,
+    bool isThinkingMode,
   ) async {
     if (!_isModelDownloaded) {
       throw Exception('LLM Model not downloaded.');
@@ -105,10 +106,13 @@ class CactusLlmService implements LlmService {
         )
         .join('\n');
 
-    final prompt =
-        """/no_think INSTRUCTION START
-You are a Credit Card Cashback Optimizer. Your goal is to analyze the provided Credit Card List and the Current Purchase details. You must recommend the single credit card that offers the absolute highest cashback percentage for the stated purchase category. Provide only the recommendation and the rate. Do not use external knowledge.
-INSTRUCTION END
+    String instructionStart = "INSTRUCTION START\nYou are a Credit Card Cashback Optimizer. Your goal is to analyze the provided Credit Card List and the Current Purchase details. You must recommend the single credit card that offers the absolute highest cashback percentage for the stated purchase category. Provide only the recommendation and the rate. Do not use external knowledge.";
+    String instructionEnd = "INSTRUCTION END";
+
+    String promptPrefix = isThinkingMode ? "/think " : "/no_think ";
+
+    final prompt = """$promptPrefix$instructionStart
+$instructionEnd
 
 CREDIT CARD LIST
 $cardDetails
@@ -129,16 +133,20 @@ HIGHEST CASHBACK RATE: [X%]
 APPLICABLE REWARD RULE: [The specific reward rule that gives the highest rate]""";
 
     try {
-      final result = await _cactusLM.generateCompletion(
+      final streamedResult = await _cactusLM.generateCompletionStream(
         messages: [ChatMessage(content: prompt, role: "user")],
         params: CactusCompletionParams(maxTokens: 8 * 1024),
       );
 
-      if (result.success) {
-        return result.response ?? 'No response from LLM.';
-      } else {
-        return 'LLM completion failed: Unknown error';
+      final StringBuffer buffer = StringBuffer();
+      await for (final chunk in streamedResult.stream) { // chunk is now String
+        buffer.write(chunk);
       }
+      final fullResponse = buffer.toString();
+      if (fullResponse.isEmpty) {
+        return 'No response from LLM.';
+      }
+      return fullResponse;
     } catch (e) {
       if (kDebugMode) {
         print('Error getting card match from LLM: $e');
