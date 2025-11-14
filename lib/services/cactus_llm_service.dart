@@ -13,7 +13,8 @@ class CactusLlmService implements LlmService {
 
   bool _isModelDownloaded = false;
 
-  static const String _isModelDownloadedKey = 'isModelDownloaded'; // Key for shared_preferences
+  static const String _isModelDownloadedKey =
+      'isModelDownloaded'; // Key for shared_preferences
 
   CactusLlmService() {
     _initModelStatus(); // Initialize model status asynchronously
@@ -97,24 +98,40 @@ class CactusLlmService implements LlmService {
       throw Exception('LLM Model not downloaded.');
     }
 
-    String prompt =
-        "Given the following credit card information and a purchase, recommend the best credit card with the highest cash back reward that fits the purchase's category.\n\n";
+    final cardDetails = cardInfo
+        .map(
+          (card) =>
+              "CARD: Name: ${card['name']}, Rewards: [Placeholder for specific reward rules from ${card['url']}]",
+        )
+        .join('\n');
 
-    prompt += "Purchase: $purchaseInfo\n\n";
+    final prompt =
+        """/no_think INSTRUCTION START
+You are a Credit Card Cashback Optimizer. Your goal is to analyze the provided Credit Card List and the Current Purchase details. You must recommend the single credit card that offers the absolute highest cashback percentage for the stated purchase category. Provide only the recommendation and the rate. Do not use external knowledge.
+INSTRUCTION END
 
-    prompt += "Available Credit Cards:\n";
+CREDIT CARD LIST
+$cardDetails
 
-    for (var card in cardInfo) {
-      prompt += "- Name: ${card['name']}, Info: ${card['url']}\n";
-    }
+CURRENT PURCHASE
+PURCHASE CATEGORY: $purchaseInfo
+DESCRIPTION: $purchaseInfo
 
-    prompt +=
-        "\nBased on the purchase and card information, which credit card offers the best reward or benefit? Just output the card name and the expected cash back reward rate in this format";
+TASK
+
+Determine the highest applicable cashback rate among the listed cards for the PURCHASE CATEGORY.
+
+Format the output exactly as requested below.
+
+OUTPUT FORMAT
+RECOMMENDED CARD: [Name of the recommended card]
+HIGHEST CASHBACK RATE: [X%]
+APPLICABLE REWARD RULE: [The specific reward rule that gives the highest rate]""";
 
     try {
       final result = await _cactusLM.generateCompletion(
         messages: [ChatMessage(content: prompt, role: "user")],
-        params: CactusCompletionParams(maxTokens: 1024),
+        params: CactusCompletionParams(maxTokens: 8 * 1024),
       );
 
       if (result.success) {
