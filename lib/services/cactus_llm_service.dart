@@ -1,9 +1,11 @@
+import 'dart:async'; // Import for StreamController
 import 'package:cactus/cactus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // Import shared_preferences
 
 import 'llm_service.dart';
+import '../models/llm_response_chunk.dart'; // Import LlmResponseChunk
 
 class CactusLlmService implements LlmService {
   final CactusLM _cactusLM = CactusLM();
@@ -90,11 +92,11 @@ class CactusLlmService implements LlmService {
   }
 
   @override
-  Future<String> getBestCardMatch(
+  Stream<LlmResponseChunk> getBestCardMatch(
     List<Map<String, String>> cardInfo,
     String purchaseInfo,
     bool isThinkingMode,
-  ) async {
+  ) async* { // Changed to async* to return a Stream
     if (!_isModelDownloaded) {
       throw Exception('LLM Model not downloaded.');
     }
@@ -138,21 +140,17 @@ APPLICABLE REWARD RULE: [The specific reward rule that gives the highest rate]""
         params: CactusCompletionParams(maxTokens: 8 * 1024),
       );
 
-      final StringBuffer buffer = StringBuffer();
-      await for (final chunk in streamedResult.stream) { // chunk is now String
-        buffer.write(chunk);
+      int currentTokenCount = 0;
+      await for (final chunk in streamedResult.stream) {
+        currentTokenCount += chunk.length; // Estimate tokens by character count
+        yield LlmResponseChunk(text: chunk, tokenCount: currentTokenCount);
       }
-      final fullResponse = buffer.toString();
-      if (fullResponse.isEmpty) {
-        return 'No response from LLM.';
-      }
-      return fullResponse;
     } catch (e) {
       if (kDebugMode) {
         print('Error getting card match from LLM: $e');
       }
-
-      return 'Error getting card match.';
+      // Re-throw the error to be handled by the caller
+      throw Exception('Error getting card match: $e');
     }
   }
 }

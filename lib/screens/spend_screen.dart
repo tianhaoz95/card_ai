@@ -22,6 +22,7 @@ class _SpendScreenState extends State<SpendScreen> {
   String _thinkContent = ''; // New state variable for think content
   bool _isLoading = false; // Added loading state
   bool _isThinkingMode = false; // New state variable for thinking mode toggle
+  int _tokenCount = 0; // New state variable for token count
 
   // Helper to extract content between <think> tags
   String _extractThinkContent(String text) {
@@ -115,26 +116,52 @@ class _SpendScreenState extends State<SpendScreen> {
                                   _isLoading = true; // Set loading to true
                                   _bestCardMatch = ''; // Clear previous match
                                   _thinkContent = ''; // Clear previous think content
+                                  _tokenCount = 0; // Clear previous token count
                                 });
+
+                                final StringBuffer responseBuffer = StringBuffer();
                                 try {
                                   final List<CreditCard> userCards = await cardService.getCardsForUser().first;
                                   final List<Map<String, String>> cardInfo = userCards
                                       .map((card) => {'name': card.name, 'url': card.url})
                                       .toList();
-                                  final rawResult = await llmService.getBestCardMatch(cardInfo, purchaseInfo, _isThinkingMode);
-                                  setState(() {
-                                    _thinkContent = _extractThinkContent(rawResult);
-                                    _bestCardMatch = _removeThinkContent(rawResult);
-                                  });
+
+                                  llmService.getBestCardMatch(cardInfo, purchaseInfo, _isThinkingMode).listen(
+                                    (chunk) {
+                                      responseBuffer.write(chunk.text);
+                                      setState(() {
+                                        _tokenCount = chunk.tokenCount;
+                                        // Update _bestCardMatch and _thinkContent incrementally if needed,
+                                        // but for now, we'll process the full response in onDone.
+                                      });
+                                    },
+                                    onDone: () {
+                                      final rawResult = responseBuffer.toString();
+                                      setState(() {
+                                        _thinkContent = _extractThinkContent(rawResult);
+                                        _bestCardMatch = _removeThinkContent(rawResult);
+                                        _isLoading = false; // Set loading to false here
+                                      });
+                                    },
+                                    onError: (e) {
+                                      // Handle error, e.g., show a SnackBar
+                                      if (!mounted) return;
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Error getting card match: $e')),
+                                      );
+                                      setState(() {
+                                        _isLoading = false; // Set loading to false on error
+                                      });
+                                    },
+                                  );
                                 } catch (e) {
-                                  // Handle error, e.g., show a SnackBar
+                                  // This catch block handles errors from getBestCardMatch itself (e.g., LLM not downloaded)
                                   if (!mounted) return;
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(content: Text('Error getting card match: $e')),
                                   );
-                                } finally {
                                   setState(() {
-                                    _isLoading = false; // Set loading to false
+                                    _isLoading = false; // Set loading to false on error
                                   });
                                 }
                               }
@@ -143,6 +170,9 @@ class _SpendScreenState extends State<SpendScreen> {
                           ),
                   ],
                 ),
+                const SizedBox(height: 20),
+                if (_tokenCount > 0) // Display token count only if greater than 0
+                  Text('Tokens Generated: $_tokenCount'),
                 const SizedBox(height: 20),
                 if (_bestCardMatch.isNotEmpty)
                   Row(
