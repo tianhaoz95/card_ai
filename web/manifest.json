@@ -1,6 +1,6 @@
 {
-    "name": "card_ai",
-    "short_name": "card_ai",
+    "name": "Card.ai",
+    "short_name": "Card.ai",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
