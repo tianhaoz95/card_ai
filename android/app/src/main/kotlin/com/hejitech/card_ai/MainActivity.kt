@@ -1,4 +1,4 @@
-package com.example.card_ai
+package com.hejitech.card_ai
 
 import io.flutter.embedding.android.FlutterActivity
 
