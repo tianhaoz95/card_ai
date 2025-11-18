@@ -66,135 +66,148 @@ class _SpendScreenState extends State<SpendScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (!isModelDownloaded) ...[
-                Text(localizations.modelNotDownloaded),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SettingsScreen()));
-                  },
-                  child: Text(localizations.goToSettingsButton),
-                ),
-              ] else ...[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('Thinking Mode:'),
-                    Switch(
-                      value: _isThinkingMode,
-                      onChanged: (value) {
-                        setState(() {
-                          _isThinkingMode = value;
-                        });
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Top section (results or model not downloaded message)
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0), // Apply padding here
+              child: Column(
+                children: [
+                  if (!isModelDownloaded) ...[
+                    Text(localizations.modelNotDownloaded),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SettingsScreen()));
                       },
+                      child: Text(localizations.goToSettingsButton),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _purchaseInfoController,
-                        decoration: InputDecoration(labelText: localizations.purchaseInfoHint),
-                      ),
-                    ),
-                    const SizedBox(width: 10), // Add some spacing between the text field and button
-                    _isLoading
-                        ? const CircularProgressIndicator() // Show progress indicator when loading
-                        : ElevatedButton(
-                            onPressed: () async {
-                              String purchaseInfo = _purchaseInfoController.text;
-                              if (purchaseInfo.isNotEmpty) {
-                                setState(() {
-                                  _isLoading = true; // Set loading to true
-                                  _bestCardMatch = ''; // Clear previous match
-                                  _thinkContent = ''; // Clear previous think content
-                                  _tokenCount = 0; // Clear previous token count
-                                });
-
-                                final StringBuffer responseBuffer = StringBuffer();
-                                try {
-                                  final List<CreditCard> userCards = await cardService.getCardsForUser().first;
-                                  final List<Map<String, String>> cardInfo = userCards
-                                      .map((card) => {'name': card.name, 'url': card.url})
-                                      .toList();
-
-                                  llmService.getBestCardMatch(cardInfo, purchaseInfo, _isThinkingMode).listen(
-                                    (chunk) {
-                                      responseBuffer.write(chunk.text);
-                                      setState(() {
-                                        _tokenCount = chunk.tokenCount;
-                                        // Update _bestCardMatch and _thinkContent incrementally if needed,
-                                        // but for now, we'll process the full response in onDone.
-                                      });
-                                    },
-                                    onDone: () {
-                                      final rawResult = responseBuffer.toString();
-                                      setState(() {
-                                        _thinkContent = _extractThinkContent(rawResult);
-                                        _bestCardMatch = _removeThinkContent(rawResult);
-                                        _isLoading = false; // Set loading to false here
-                                      });
-                                    },
-                                    onError: (e) {
-                                      // Handle error, e.g., show a SnackBar
-                                      if (!mounted) return;
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Error getting card match: $e')),
-                                      );
-                                      setState(() {
-                                        _isLoading = false; // Set loading to false on error
-                                      });
-                                    },
-                                  );
-                                } catch (e) {
-                                  // This catch block handles errors from getBestCardMatch itself (e.g., LLM not downloaded)
-                                  if (!mounted) return;
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Error getting card match: $e')),
-                                  );
-                                  setState(() {
-                                    _isLoading = false; // Set loading to false on error
-                                  });
-                                }
-                              }
-                            },
-                            child: Text(localizations.getMatchButton),
+                  ] else ...[
+                    if (_tokenCount > 0) // Display token count only if greater than 0
+                      Text('Tokens Generated: $_tokenCount'),
+                    const SizedBox(height: 20),
+                    if (_bestCardMatch.isNotEmpty)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Best Card: $_bestCardMatch',
+                              style: Theme.of(context).textTheme.headlineSmall,
+                            ),
                           ),
+                          if (_thinkContent.isNotEmpty)
+                            IconButton(
+                              icon: const Icon(Icons.help_outline),
+                              onPressed: () => _showThinkContentDialog(context, localizations, _thinkContent),
+                            ),
+                        ],
+                      ),
                   ],
-                ),
-                const SizedBox(height: 20),
-                if (_tokenCount > 0) // Display token count only if greater than 0
-                  Text('Tokens Generated: $_tokenCount'),
-                const SizedBox(height: 20),
-                if (_bestCardMatch.isNotEmpty)
+                ],
+              ),
+            ),
+          ),
+          // Bottom section (input, button, toggle)
+          if (isModelDownloaded) // Only show input/toggle if model is downloaded
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Expanded(
-                        child: Text(
-                          'Best Card: $_bestCardMatch',
-                          style: Theme.of(context).textTheme.headlineSmall,
-                        ),
+                      Text('Thinking Mode:'),
+                      Switch(
+                        value: _isThinkingMode,
+                        onChanged: (value) {
+                          setState(() {
+                            _isThinkingMode = value;
+                          });
+                        },
                       ),
-                      if (_thinkContent.isNotEmpty)
-                        IconButton(
-                          icon: const Icon(Icons.help_outline),
-                          onPressed: () => _showThinkContentDialog(context, localizations, _thinkContent),
-                        ),
                     ],
                   ),
-              ],
-            ],
-          ),
-        ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _purchaseInfoController,
+                          decoration: InputDecoration(labelText: localizations.purchaseInfoHint),
+                        ),
+                      ),
+                      const SizedBox(width: 10), // Add some spacing between the text field and button
+                      _isLoading
+                          ? const CircularProgressIndicator() // Show progress indicator when loading
+                          : ElevatedButton(
+                              onPressed: () async {
+                                String purchaseInfo = _purchaseInfoController.text;
+                                if (purchaseInfo.isNotEmpty) {
+                                  setState(() {
+                                    _isLoading = true; // Set loading to true
+                                    _bestCardMatch = ''; // Clear previous match
+                                    _thinkContent = ''; // Clear previous think content
+                                    _tokenCount = 0; // Clear previous token count
+                                  });
+
+                                  final StringBuffer responseBuffer = StringBuffer();
+                                  try {
+                                    final List<CreditCard> userCards = await cardService.getCardsForUser().first;
+                                    final List<Map<String, String>> cardInfo = userCards
+                                        .map((card) => {'name': card.name, 'url': card.url})
+                                        .toList();
+
+                                    llmService.getBestCardMatch(cardInfo, purchaseInfo, _isThinkingMode).listen(
+                                      (chunk) {
+                                        responseBuffer.write(chunk.text);
+                                        setState(() {
+                                          _tokenCount = chunk.tokenCount;
+                                          // Update _bestCardMatch and _thinkContent incrementally if needed,
+                                          // but for now, we'll process the full response in onDone.
+                                        });
+                                      },
+                                      onDone: () {
+                                        final rawResult = responseBuffer.toString();
+                                        setState(() {
+                                          _thinkContent = _extractThinkContent(rawResult);
+                                          _bestCardMatch = _removeThinkContent(rawResult);
+                                          _isLoading = false; // Set loading to false here
+                                        });
+                                      },
+                                      onError: (e) {
+                                        // Handle error, e.g., show a SnackBar
+                                        if (!mounted) return;
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text('Error getting card match: $e')),
+                                        );
+                                        setState(() {
+                                          _isLoading = false; // Set loading to false on error
+                                        });
+                                      },
+                                    );
+                                  } catch (e) {
+                                    // This catch block handles errors from getBestCardMatch itself (e.g., LLM not downloaded)
+                                    if (!mounted) return;
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Error getting card match: $e')),
+                                    );
+                                    setState(() {
+                                      _isLoading = false; // Set loading to false on error
+                                    });
+                                  }
+                                }
+                              },
+                              child: Text(localizations.getMatchButton),
+                            ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }
