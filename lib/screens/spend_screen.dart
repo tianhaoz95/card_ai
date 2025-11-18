@@ -142,7 +142,8 @@ class _SpendScreenState extends State<SpendScreen> {
                       const SizedBox(width: 10), // Add some spacing between the text field and button
                       _isLoading
                           ? const CircularProgressIndicator() // Show progress indicator when loading
-                          : ElevatedButton(
+                          : IconButton(
+                              icon: const Icon(Icons.credit_card),
                               onPressed: () async {
                                 String purchaseInfo = _purchaseInfoController.text;
                                 if (purchaseInfo.isNotEmpty) {
@@ -200,7 +201,6 @@ class _SpendScreenState extends State<SpendScreen> {
                                   }
                                 }
                               },
-                              child: Text(localizations.getMatchButton),
                             ),
                     ],
                   ),
