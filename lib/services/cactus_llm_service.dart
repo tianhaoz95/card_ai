@@ -96,7 +96,8 @@ class CactusLlmService implements LlmService {
     List<Map<String, String>> cardInfo,
     String purchaseInfo,
     bool isThinkingMode,
-  ) async* { // Changed to async* to return a Stream
+  ) async* {
+    // Changed to async* to return a Stream
     if (!_isModelDownloaded) {
       throw Exception('LLM Model not downloaded.');
     }
@@ -108,12 +109,14 @@ class CactusLlmService implements LlmService {
         )
         .join('\n');
 
-    String instructionStart = "INSTRUCTION START\nYou are a Credit Card Cashback Optimizer. Your goal is to analyze the provided Credit Card List and the Current Purchase details. You must recommend the single credit card that offers the absolute highest cashback percentage for the stated purchase category. Provide only the recommendation and the rate. Do not use external knowledge.";
+    String instructionStart =
+        "INSTRUCTION START\nYou are a Credit Card Cashback Optimizer. Your goal is to analyze the provided Credit Card List and the Current Purchase details. You must recommend the single credit card that offers the absolute highest cashback percentage for the stated purchase category. Provide only the recommendation and the rate. Do not use external knowledge.";
     String instructionEnd = "INSTRUCTION END";
 
     String promptPrefix = isThinkingMode ? "/think " : "/no_think ";
 
-    final prompt = """$promptPrefix$instructionStart
+    final prompt =
+        """$instructionStart
 $instructionEnd
 
 CREDIT CARD LIST
@@ -132,7 +135,7 @@ Format the output exactly as requested below.
 OUTPUT FORMAT
 RECOMMENDED CARD: [Name of the recommended card]
 HIGHEST CASHBACK RATE: [X%]
-APPLICABLE REWARD RULE: [The specific reward rule that gives the highest rate]""";
+APPLICABLE REWARD RULE: [The specific reward rule that gives the highest rate] $promptPrefix""";
 
     try {
       final streamedResult = await _cactusLM.generateCompletionStream(
