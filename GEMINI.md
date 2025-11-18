@@ -2,3 +2,4 @@
 - To run unit tests in the Flutter project, use the command `flutter test`. To run build tests, use the command `flutter build aab`.
 - After a successful task implementation, boost the build number in `pubspec.yaml` by 1. For example, if the current version number is `version: 0.1.16+26`, the boosted version should be `version: 0.1.16+27`.
 - After a successful task implementation and version boost, build the aab and move it to root directory with a name describing the task completed by first run `flutter build aab` and then `cp build/app/outputs/bundle/release/app-release.aab {feature-description}.aab`.
+- To find instructions for using cactus LLM inference engine, see https://www.cactuscompute.com/docs/flutter.
